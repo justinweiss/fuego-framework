@@ -1,0 +1,8 @@
+pkg
+galbraithjoseph-boostoniphone
+fuego-*.tar.gz
+build
+*.pbxuser
+*.xcworkspace
+xcuserdata/
+.DS_Store
