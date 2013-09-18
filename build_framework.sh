@@ -14,6 +14,7 @@ WRK_DIR=build
 DEVICE_DIR=${WRK_DIR}/Release-iphoneos
 SIMULATOR_DIR=${WRK_DIR}/Release-iphonesimulator
 
+
 # Building both architectures.
 xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphoneos
 xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphonesimulator
