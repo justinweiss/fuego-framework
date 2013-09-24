@@ -1,5 +1,5 @@
 diff --git a/boost.sh b/boost.sh
-index a860582..f885337 100755
+index a860582..0cb43ae 100755
 --- a/boost.sh
 +++ b/boost.sh
 @@ -1,3 +1,4 @@
@@ -45,20 +45,26 @@ index a860582..f885337 100755
      doneSection
  }
  
-@@ -94,10 +91,10 @@ updateBoost()
+@@ -94,30 +91,32 @@ updateBoost()
  	if [ -d $BOOST_SRC ]
  	then
  		# Remove everything not under version control...
 -		svn st --no-ignore $BOOST_SRC | egrep '^[?I]' | sed 's:.......::' | xargs rm -rf 
-+		svn st --no-ignore $BOOST_SRC | egrep '^[?I]' | sed 's:.......::' | xargs rm -rf
- 		svn update boost
+-		svn update boost
++    pushd $BOOST_SRC
++    git clean -df
++		git fetch
  	else
 -		BOOST_BRANCH=`svn ls http://svn.boost.org/svn/boost/tags/release/ | sort | tail -1`
-+		BOOST_BRANCH=`svn ls http://svn.boost.org/svn/boost/tags/release/ | sort | grep $BOOST_VERSION | tail -1`
- 		svn co http://svn.boost.org/svn/boost/tags/release/$BOOST_BRANCH boost
+-		svn co http://svn.boost.org/svn/boost/tags/release/$BOOST_BRANCH boost
++    git clone https://github.com/ned14/boost-trunk.git boost
++    pushd $BOOST_SRC
++    git checkout $BOOST_VERSION
  	fi
  
-@@ -106,12 +103,12 @@ updateBoost()
+-	svn st $BOOST_SRC/tools/build/v2/user-config.jam | grep '^M'
++	git ls-files -m | grep $BOOST_SRC/tools/build/v2/user-config.jam
+ 	if [ $? != 0 ]
  	then
      	cat >> $BOOST_SRC/tools/build/v2/user-config.jam <<EOF
  using darwin : ${IPHONE_SDKVERSION}~iphone
@@ -73,7 +79,14 @@ index a860582..f885337 100755
     : <striper> <root>$XCODE_ROOT/Platforms/iPhoneSimulator.platform/Developer
     : <architecture>x86 <target-os>iphone
     ;
-@@ -148,7 +145,7 @@ bootstrapBoost()
+ EOF
+ 	fi
+-
++  popd
+     doneSection
+ }
+ 
+@@ -148,7 +147,7 @@ bootstrapBoost()
  buildBoostForiPhoneOS()
  {
      cd $BOOST_SRC
@@ -82,7 +95,7 @@ index a860582..f885337 100755
  	# Install this one so we can copy the includes for the frameworks...
      ./bjam -j16 --build-dir=../iphone-build --stagedir=../iphone-build/stage --prefix=$PREFIXDIR toolset=darwin architecture=arm target-os=iphone macosx-version=iphone-${IPHONE_SDKVERSION} define=_LITTLE_ENDIAN link=static stage
      ./bjam -j16 --build-dir=../iphone-build --stagedir=../iphone-build/stage --prefix=$PREFIXDIR toolset=darwin architecture=arm target-os=iphone macosx-version=iphone-${IPHONE_SDKVERSION} define=_LITTLE_ENDIAN link=static install
-@@ -156,9 +153,6 @@ buildBoostForiPhoneOS()
+@@ -156,9 +155,6 @@ buildBoostForiPhoneOS()
  
      ./bjam -j16 --build-dir=../iphonesim-build --stagedir=../iphonesim-build/stage --toolset=darwin architecture=x86 target-os=iphone macosx-version=iphonesim-${IPHONE_SDKVERSION} link=static stage
  	doneSection
@@ -92,7 +105,7 @@ index a860582..f885337 100755
  }
  
  #===============================================================================
-@@ -167,13 +161,11 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
+@@ -167,13 +163,11 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
  {
  	cd $SRCDIR
  
@@ -108,7 +121,7 @@ index a860582..f885337 100755
  
      ALL_LIBS=""
  
-@@ -181,45 +173,36 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
+@@ -181,45 +175,36 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
      for NAME in $BOOST_LIBS; do
          ALL_LIBS="$ALL_LIBS libboost_$NAME.a"
  
@@ -163,7 +176,7 @@ index a860582..f885337 100755
  }
  
  #===============================================================================
-@@ -304,10 +287,8 @@ echo "BOOST_VERSION:     $BOOST_VERSION"
+@@ -304,10 +289,8 @@ echo "BOOST_VERSION:     $BOOST_VERSION"
  echo "BOOST_LIBS:        $BOOST_LIBS"
  echo "BOOST_SRC:         $BOOST_SRC"
  echo "IOSBUILDDIR:       $IOSBUILDDIR"
@@ -174,7 +187,7 @@ index a860582..f885337 100755
  echo "IPHONE_SDKVERSION: $IPHONE_SDKVERSION"
  echo "XCODE_ROOT:        $XCODE_ROOT"
  echo "COMPILER:          $COMPILER"
-@@ -318,7 +299,6 @@ bootstrapBoost
+@@ -318,7 +301,6 @@ bootstrapBoost
  buildBoostForiPhoneOS
  scrunchAllLibsTogetherInOneLibPerPlatform
  buildFramework $IOSFRAMEWORKDIR $IOSBUILDDIR
