@@ -1,0 +1,206 @@
+diff --git a/fuego/gtpengine/GtpEngine.cpp b/fuego/gtpengine/GtpEngine.cpp
+index 46b2808..08226f0 100644
+--- a/fuego/gtpengine/GtpEngine.cpp
++++ b/fuego/gtpengine/GtpEngine.cpp
+@@ -118,9 +118,9 @@ void Trim(string& str)
+ /** Utility functions for Boost.Thread. */
+ namespace {
+ 
+-void Notify(mutex& aMutex, condition& aCondition)
++void Notify(boost::mutex& aMutex, condition& aCondition)
+ {
+-    mutex::scoped_lock lock(aMutex);
++    boost::mutex::scoped_lock lock(aMutex);
+     aCondition.notify_all();
+ }
+ 
+@@ -167,15 +167,15 @@ private:
+ 
+     barrier m_threadReady;
+ 
+-    mutex m_startPonderMutex;
++    boost::mutex m_startPonderMutex;
+ 
+-    mutex m_ponderFinishedMutex;
++    boost::mutex m_ponderFinishedMutex;
+ 
+     condition m_startPonder;
+ 
+     condition m_ponderFinished;
+ 
+-    mutex::scoped_lock m_ponderFinishedLock;
++    boost::mutex::scoped_lock m_ponderFinishedLock;
+ 
+     /** The thread to run the ponder function.
+         Order dependency: must be constructed as the last member, because the
+@@ -190,7 +190,7 @@ PonderThread::Function::Function(PonderThread& ponderThread)
+ 
+ void PonderThread::Function::operator()()
+ {
+-    mutex::scoped_lock lock(m_ponderThread.m_startPonderMutex);
++    boost::mutex::scoped_lock lock(m_ponderThread.m_startPonderMutex);
+     m_ponderThread.m_threadReady.wait();
+     while (true)
+     {
+@@ -281,15 +281,15 @@ private:
+ 
+     barrier m_threadReady;
+ 
+-    mutex m_waitCommandMutex;
++    boost::mutex m_waitCommandMutex;
+ 
+     condition m_waitCommand;
+ 
+-    mutex m_commandReceivedMutex;
++    boost::mutex m_commandReceivedMutex;
+ 
+     condition m_commandReceived;
+ 
+-    mutex::scoped_lock m_commandReceivedLock;
++    boost::mutex::scoped_lock m_commandReceivedLock;
+ 
+     /** The thread to run the read command function.
+         Order dependency: must be constructed as the last member, because the
+@@ -304,7 +304,7 @@ ReadThread::Function::Function(ReadThread& readThread)
+ 
+ void ReadThread::Function::operator()()
+ {
+-    mutex::scoped_lock lock(m_readThread.m_waitCommandMutex);
++    boost::mutex::scoped_lock lock(m_readThread.m_waitCommandMutex);
+     m_readThread.m_threadReady.wait();
+     GtpEngine& engine = m_readThread.m_engine;
+     GtpInputStream& in = m_readThread.m_in;
+diff --git a/fuego/smartgame/SgProcess.cpp b/fuego/smartgame/SgProcess.cpp
+index 7d4d669..f4f1a81 100644
+--- a/fuego/smartgame/SgProcess.cpp
++++ b/fuego/smartgame/SgProcess.cpp
+@@ -5,9 +5,10 @@
+ 
+ #include "SgSystem.h"
+ #include "SgProcess.h"
++#include "SgException.h"
+ 
+-// Not yet implemented for Windows
+-#ifndef WIN32
++// Not yet implemented for Windows or clang
++#if defined(__GNUC__) && ! defined(__clang__)
+ 
+ #include <errno.h>
+ #include <fstream>
+@@ -18,7 +19,6 @@
+ #include <sys/types.h>
+ #include <unistd.h>
+ #include "SgDebug.h"
+-#include "SgException.h"
+ #include "SgStringUtil.h"
+ 
+ using namespace std;
+@@ -107,10 +107,19 @@ SgProcess::SgProcess(const std::string& command)
+     }
+ }
+ 
++#else
++
++SgProcess::SgProcess(const std::string& command)
++{
++    SG_UNUSED(command);
++    throw SgException("SgProcess not implemented on this architecture");
++}
++
++
++#endif // defined(__GNUC__) && ! defined(__clang__)
++
+ SgProcess::~SgProcess()
+ {
+ }
+ 
+ //----------------------------------------------------------------------------
+-
+-#endif // ifndef WIN32
+diff --git a/fuego/smartgame/SgProcess.h b/fuego/smartgame/SgProcess.h
+index 7f38f41..7b58082 100644
+--- a/fuego/smartgame/SgProcess.h
++++ b/fuego/smartgame/SgProcess.h
+@@ -5,11 +5,12 @@
+ #ifndef SG_PROCESS_H
+ #define SG_PROCESS_H
+ 
+-// Not yet implemented for Windows
+-#ifndef WIN32
+ 
+-#include <ext/stdio_filebuf.h> // GCC specific
+ #include <iosfwd>
++
++// Not yet implemented for Windows or clang
++#if defined(__GNUC__) && ! defined(__clang__)
++#include <ext/stdio_filebuf.h> // GCC specific
+ #include <memory>
+ 
+ //----------------------------------------------------------------------------
+@@ -54,6 +55,18 @@ inline std::ostream& SgProcess::Output()
+ 
+ //----------------------------------------------------------------------------
+ 
+-#endif // ifndef WIN32
++#else
++
++class SgProcess
++{
++public:
++    /** Constructor.
++     @throws SgException */
++    SgProcess(const std::string& command);
++    
++    ~SgProcess();
++};
++
++#endif // defined(__GNUC__) && ! defined(__clang__)
+ 
+ #endif // SG_PROCESS_H
+diff --git a/fuego/smartgame/SgUctSearch.cpp b/fuego/smartgame/SgUctSearch.cpp
+index 62198f8..5e49b28 100644
+--- a/fuego/smartgame/SgUctSearch.cpp
++++ b/fuego/smartgame/SgUctSearch.cpp
+@@ -78,9 +78,9 @@ size_t GetMaxNodesDefault()
+     return nodesPerTree;
+ }
+ 
+-void Notify(mutex& aMutex, condition& aCondition)
++void Notify(boost::mutex& aMutex, condition& aCondition)
+ {
+-    mutex::scoped_lock lock(aMutex);
++    boost::mutex::scoped_lock lock(aMutex);
+     aCondition.notify_all();
+ }
+ 
+@@ -191,7 +191,7 @@ void SgUctSearch::Thread::operator()()
+     if (DEBUG_THREADS)
+         SgDebug() << "SgUctSearch::Thread: starting thread "
+                   << m_state->m_threadId << '\n';
+-    mutex::scoped_lock lock(m_startPlayMutex);
++    boost::mutex::scoped_lock lock(m_startPlayMutex);
+     m_threadReady.wait();
+     while (true)
+     {
+@@ -418,7 +418,7 @@ void SgUctSearch::CreateThreads()
+     {
+         auto_ptr<SgUctThreadState> state(
+                                       m_threadStateFactory->Create(i, *this));
+-        shared_ptr<Thread> thread(new Thread(*this, state));
++        boost::shared_ptr<Thread> thread(new Thread(*this, state));
+         m_threads.push_back(thread);
+     }
+     m_tree.CreateAllocators(m_numberThreads);
+diff --git a/fuego/smartgame/SgUctTree.cpp b/fuego/smartgame/SgUctTree.cpp
+index 8e99f32..074bdcb 100644
+--- a/fuego/smartgame/SgUctTree.cpp
++++ b/fuego/smartgame/SgUctTree.cpp
+@@ -455,7 +455,7 @@ void SgUctTreeIterator::operator++()
+     if (m_current->HasChildren())
+     {
+         SgUctChildIterator* it = new SgUctChildIterator(m_tree, *m_current);
+-        m_stack.push(shared_ptr<SgUctChildIterator>(it));
++        m_stack.push(boost::shared_ptr<SgUctChildIterator>(it));
+         m_current = &(**it);
+         return;
+     }

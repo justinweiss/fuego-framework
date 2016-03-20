@@ -1,12 +1,5 @@
-git clone git://gitorious.org/~galbraithjoseph/boostoniphone/galbraithjosephs-boostoniphone.git
-cd galbraithjosephs-boostoniphone
-patch -p1 < ../patches/boostoniphone.diff
-./boost.sh
-
-cd ..
-mkdir -p pkg
-mv galbraithjosephs-boostoniphone/ios/framework/boost.framework pkg
-
+./boost.sh -ios
+mv ios/framework/* pkg
 curl -L -O http://downloads.sourceforge.net/project/fuego/fuego/1.1/fuego-1.1.tar.gz
 
 echo "Unpacking fuego..."
@@ -17,9 +10,10 @@ echo "Applying patches..."
 patch -p2 < patches/fuego_boost_1_46.diff
 patch -p2 < patches/fuego_boost_1_51.diff
 patch -p2 < patches/fuego_llvm.diff
+patch -p1 < patches/fuego_clang.diff
 
 echo "Building fuego.framework..."
 
 ./build_framework.sh
 
-rm -rf build fuego fuego-*.tar.gz galbraithjosephs-boostoniphone
+rm -rf boost_*.tar.bz2 src ios fuego-*.tar.gz fuego build 
