@@ -1192,7 +1192,10 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/pkg\"",
 				);
-				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NDEBUG,
+					FUEGO_NDEBUG,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = Headers;
 				SKIP_INSTALL = YES;

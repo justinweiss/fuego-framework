@@ -11,6 +11,7 @@ patch -p2 < patches/fuego_boost_1_46.diff
 patch -p2 < patches/fuego_boost_1_51.diff
 patch -p2 < patches/fuego_llvm.diff
 patch -p1 < patches/fuego_clang.diff
+patch -p1 < patches/fuego_ndebug.diff
 
 echo "Building fuego.framework..."
 

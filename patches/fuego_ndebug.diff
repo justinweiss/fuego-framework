@@ -1,0 +1,506 @@
+diff --git a/fuego/go/GoAssertBoardRestored.h b/fuego/go/GoAssertBoardRestored.h
+index 474fae7..6d53b9a 100644
+--- a/fuego/go/GoAssertBoardRestored.h
++++ b/fuego/go/GoAssertBoardRestored.h
+@@ -33,7 +33,7 @@ public:
+     void Clear();
+ 
+ private:
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     const GoBoard* m_bd;
+ 
+     int m_size;
+@@ -61,7 +61,7 @@ private:
+     int m_koLevel;
+ 
+     SgEmptyBlackWhite m_koLoser;
+-#endif // NDEBUG
++#endif // FUEGO_NDEBUG
+ 
+     /** Not implemented. */
+     GoAssertBoardRestored(const GoAssertBoardRestored&);
+@@ -72,7 +72,7 @@ private:
+ 
+ inline GoAssertBoardRestored::GoAssertBoardRestored()
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_bd = 0;
+ #endif
+ }
+@@ -80,21 +80,21 @@ inline GoAssertBoardRestored::GoAssertBoardRestored()
+ inline GoAssertBoardRestored::GoAssertBoardRestored(const GoBoard& bd)
+ {
+     SG_DEBUG_ONLY(bd);
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     Init(bd);
+ #endif
+ }
+ 
+ inline GoAssertBoardRestored::~GoAssertBoardRestored()
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     AssertRestored();
+ #endif
+ }
+ 
+ inline void GoAssertBoardRestored::AssertRestored()
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     if (m_bd == 0)
+         return;
+     SG_ASSERT(m_bd->Size() == m_size);
+@@ -115,7 +115,7 @@ inline void GoAssertBoardRestored::AssertRestored()
+ 
+ inline void GoAssertBoardRestored::Clear()
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_bd = 0;
+ #endif
+ }
+@@ -123,7 +123,7 @@ inline void GoAssertBoardRestored::Clear()
+ inline void GoAssertBoardRestored::Init(const GoBoard& bd)
+ {
+     SG_DEBUG_ONLY(bd);
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_bd = &bd;
+     m_size = bd.Size();
+     m_toPlay = bd.ToPlay();
+diff --git a/fuego/go/GoBlock.h b/fuego/go/GoBlock.h
+index 44c51c8..195b059 100644
+--- a/fuego/go/GoBlock.h
++++ b/fuego/go/GoBlock.h
+@@ -133,7 +133,7 @@ public:
+     {
+         if (! m_healthy.Contains(r))
+             m_healthy.PushBack(r);
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         else
+             // @todo debug me! see case 1540-1550 in uct_move.tst
+             // seems to happen after same position recomputed with second
+diff --git a/fuego/go/GoBoard.h b/fuego/go/GoBoard.h
+index 1c236a3..feb7069 100644
+--- a/fuego/go/GoBoard.h
++++ b/fuego/go/GoBoard.h
+@@ -899,7 +899,7 @@ public:
+ 
+         const GoBoard& m_board;
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         uint64_t m_countPlay;
+ #endif
+ 
+@@ -941,7 +941,7 @@ public:
+ 
+         const GoBoard& m_board;
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         uint64_t m_countPlay;
+ #endif
+ 
+@@ -983,7 +983,7 @@ public:
+ 
+         const GoBoard& m_board;
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         SgHashCode m_oldHash;
+ #endif
+ 
+@@ -1000,7 +1000,7 @@ inline GoBoard::StoneIterator::StoneIterator(const GoBoard& bd, SgPoint p)
+       m_board(bd)
+ {
+     SG_ASSERT(m_board.Occupied(p));
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_countPlay = m_board.CountPlay();
+ #endif
+ }
+@@ -1032,7 +1032,7 @@ inline GoBoard::LibertyIterator::LibertyIterator(const GoBoard& bd, SgPoint p)
+       m_board(bd)
+ {
+     SG_ASSERT(m_board.Occupied(p));
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_countPlay = m_board.CountPlay();
+ #endif
+ }
+@@ -1060,7 +1060,7 @@ inline GoBoard::LibertyCopyIterator::LibertyCopyIterator(const GoBoard& bd,
+       m_board(bd)
+ {
+     SG_ASSERT(m_board.Occupied(p));
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_oldHash = m_board.GetHashCode();
+ #endif
+ }
+diff --git a/fuego/go/GoGame.cpp b/fuego/go/GoGame.cpp
+index 093bb50..a58e03e 100644
+--- a/fuego/go/GoGame.cpp
++++ b/fuego/go/GoGame.cpp
+@@ -69,7 +69,7 @@ GoGame::GoGame(int boardSize)
+ GoGame::~GoGame()
+ {
+     m_root->DeleteTree();
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_root = 0;
+ #endif
+ }
+diff --git a/fuego/go/GoLadder.cpp b/fuego/go/GoLadder.cpp
+index 93675b2..2f80d55 100644
+--- a/fuego/go/GoLadder.cpp
++++ b/fuego/go/GoLadder.cpp
+@@ -545,12 +545,12 @@ bool GoLadderUtil::Ladder(const GoBoard& bd, SgPoint prey,
+     // Sequence is empty.  So I have to special case this and look for
+     // moves that escape from ladder myself.
+     // ---> need to tell Martin if I find this
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     SgHashCode oldHash = bd.GetHashCode();
+ #endif
+     GoLadder ladder;
+     int result = ladder.Ladder(bd, prey, toPlay, sequence, twoLibIsEscape);
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     // Make sure Ladder didn't change the board position.
+     SG_ASSERT(oldHash == bd.GetHashCode());
+ #endif
+@@ -565,7 +565,7 @@ GoLadderStatus GoLadderUtil::LadderStatus(const GoBoard& bd, SgPoint prey,
+ {
+     SG_ASSERT(bd.IsValidPoint(prey));
+     SG_ASSERT(bd.Occupied(prey));
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     SgHashCode oldHash = bd.GetHashCode();
+ #endif
+     // Unsettled only if can capture when hunter plays first, and can escape
+@@ -596,7 +596,7 @@ GoLadderStatus GoLadderUtil::LadderStatus(const GoBoard& bd, SgPoint prey,
+                                                        escapeSequence.Front();
+         }
+     }
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     // Make sure Ladder didn't change the board position.
+     SG_ASSERT(oldHash == bd.GetHashCode());
+ #endif
+diff --git a/fuego/go/GoRegion.cpp b/fuego/go/GoRegion.cpp
+index 7d89a33..a0fc8ef 100644
+--- a/fuego/go/GoRegion.cpp
++++ b/fuego/go/GoRegion.cpp
+@@ -81,7 +81,7 @@ GoRegion::GoRegion(const GoBoard& board, const SgPointSet& points,
+           m_1vcDepth(0),
+           m_miaiStrategy(color)
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     ++s_alloc;
+ #endif
+ }
+@@ -1019,12 +1019,12 @@ void GoRegion::Fini()
+     GoChain::Fini();
+     GoBlock::Fini();
+     GoRegionBoard::Fini();
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     SG_ASSERT(s_alloc == s_free);
+ #endif
+ }
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ int GoRegion::s_alloc = 0;
+ 
+ int GoRegion::s_free = 0;
+diff --git a/fuego/go/GoRegion.h b/fuego/go/GoRegion.h
+index c56feff..0db7a3f 100644
+--- a/fuego/go/GoRegion.h
++++ b/fuego/go/GoRegion.h
+@@ -90,7 +90,7 @@ public:
+     /** Destructor */
+     ~GoRegion()
+     {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         ++s_free;
+ #endif
+     }
+@@ -424,7 +424,7 @@ private:
+         @todo does not test only for boundary block libs, but all libs. */
+     void InteriorEmpty(SgVector<SgPoint>* interiorEmpty, int maxNu) const;
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     /** debugging bookkeeping. */
+     static int s_alloc, s_free;
+ #endif
+diff --git a/fuego/gouct/GoUctGlobalSearch.h b/fuego/gouct/GoUctGlobalSearch.h
+index 1c5ff71..e774c32 100644
+--- a/fuego/gouct/GoUctGlobalSearch.h
++++ b/fuego/gouct/GoUctGlobalSearch.h
+@@ -430,7 +430,7 @@ SgMove GoUctGlobalSearchState<POLICY>::GeneratePlayoutMove(
+         return SG_NULLMOVE;
+     SgPoint move = m_policy->GenerateMove();
+     SG_ASSERT(move != SG_NULLMOVE);
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     // Check that policy generates pass only if no points are left for which
+     // GeneratePoint() returns true. See GoUctPlayoutPolicy::GenerateMove()
+     if (move == SG_PASS)
+diff --git a/fuego/gtpengine/GtpEngine.cpp b/fuego/gtpengine/GtpEngine.cpp
+index 08226f0..66b57d2 100644
+--- a/fuego/gtpengine/GtpEngine.cpp
++++ b/fuego/gtpengine/GtpEngine.cpp
+@@ -635,7 +635,7 @@ GtpEngine::~GtpEngine()
+     for (Iterator i = m_callbacks.begin(); i != m_callbacks.end(); ++i)
+     {
+         delete i->second;
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         i->second = 0;
+ #endif
+     }
+@@ -820,7 +820,7 @@ void GtpEngine::Register(const string& command, GtpCallbackBase* callback)
+     if (pos != m_callbacks.end())
+     {
+         delete pos->second;
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         pos->second = 0;
+ #endif
+         m_callbacks.erase(pos);
+diff --git a/fuego/gtpengine/GtpEngine.h b/fuego/gtpengine/GtpEngine.h
+index 89f319c..aec279a 100644
+--- a/fuego/gtpengine/GtpEngine.h
++++ b/fuego/gtpengine/GtpEngine.h
+@@ -533,7 +533,7 @@ GtpCallback<ENGINE>::GtpCallback(ENGINE* instance,
+ template<class ENGINE>
+ GtpCallback<ENGINE>::~GtpCallback() throw()
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     m_instance = 0;
+ #endif
+ }
+diff --git a/fuego/smartgame/SgInit.cpp b/fuego/smartgame/SgInit.cpp
+index 66afb71..3c08436 100644
+--- a/fuego/smartgame/SgInit.cpp
++++ b/fuego/smartgame/SgInit.cpp
+@@ -33,25 +33,25 @@ void SgFini()
+ void SgInitImpl(bool compiledInDebugMode)
+ {
+     // Compiling the library and user code with inconsistent definition
+-    // of NDEBUG causes undefined behavoior, since some of the SmartGame
++    // of FUEGO_NDEBUG causes undefined behavoior, since some of the SmartGame
+     // classes contain additional debugging variables in debug mode, and the
+     // user code will have different opinions about the size and layout of
+     // these classes.
+     // This function must not be inline, it needs to use the setting of
+     // _DEBUG at the compile-time of the library.
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     if (! compiledInDebugMode)
+     {
+         cerr <<
+             "Incompatible library: SmartGame was compiled "
+-            "without NDEBUG, but main program with\n";
++            "without FUEGO_NDEBUG, but main program with\n";
+         abort();
+     }
+ #else
+     if (compiledInDebugMode)
+     {
+         cerr << "Incompatible library: SmartGame was compiled "
+-            "with NDEBUG, but main program without\n";
++            "with FUEGO_NDEBUG, but main program without\n";
+         abort();
+     }
+ #endif
+diff --git a/fuego/smartgame/SgInit.h b/fuego/smartgame/SgInit.h
+index 89cd1a9..8e4bed4 100644
+--- a/fuego/smartgame/SgInit.h
++++ b/fuego/smartgame/SgInit.h
+@@ -28,9 +28,9 @@ void SgFini();
+     @throws SgException on error */
+ inline void SgInit()
+ {
+-    // This function must be inline, it needs to use the setting of NDEBUG
++    // This function must be inline, it needs to use the setting of FUEGO_NDEBUG
+     // of the user code including this header
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     SgInitImpl(true);
+ #else
+     SgInitImpl(false);
+diff --git a/fuego/smartgame/SgMarker.h b/fuego/smartgame/SgMarker.h
+index 3aef20d..ff13718 100644
+--- a/fuego/smartgame/SgMarker.h
++++ b/fuego/smartgame/SgMarker.h
+@@ -40,7 +40,7 @@ private:
+     /** Marked points */
+     SgArray<int,SG_MAXPOINT> m_mark;
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     /** See ReserveBoardMarker */
+     bool m_markerInUse;
+ 
+@@ -55,7 +55,7 @@ private:
+ };
+ 
+ inline SgMarker::SgMarker()
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     : m_markerInUse(false)
+ #endif
+ {
+@@ -114,12 +114,12 @@ public:
+     ~SgReserveMarker();
+ 
+ private:
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     SgMarker& m_marker;
+ #endif
+ };
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ 
+ inline SgReserveMarker::SgReserveMarker(SgMarker& marker)
+     : m_marker(marker)
+diff --git a/fuego/smartgame/SgMiaiStrategy.cpp b/fuego/smartgame/SgMiaiStrategy.cpp
+index aa99ec5..49fcfb7 100644
+--- a/fuego/smartgame/SgMiaiStrategy.cpp
++++ b/fuego/smartgame/SgMiaiStrategy.cpp
+@@ -33,7 +33,7 @@ void SgMiaiStrategy::Write(std::ostream& stream) const
+ 
+ void SgMiaiStrategy::AddPair(const SgMiaiPair& m)
+ {
+-#ifndef NDEBUG // check that points are new.
++#ifndef FUEGO_NDEBUG // check that points are new.
+     SgPointSet dependency = Dependency();
+     SG_ASSERT(! dependency.Contains(m.first));
+     SG_ASSERT(! dependency.Contains(m.second));
+diff --git a/fuego/smartgame/SgNode.cpp b/fuego/smartgame/SgNode.cpp
+index e247b17..dda6040 100644
+--- a/fuego/smartgame/SgNode.cpp
++++ b/fuego/smartgame/SgNode.cpp
+@@ -30,7 +30,7 @@ SgNode::SgNode()
+       m_props(),
+       m_marked(false)
+ {
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     ++s_alloc;
+ #endif
+ }
+@@ -67,7 +67,7 @@ SgNode::~SgNode()
+         // cannot delete the root node if it has a subtree
+         SG_ASSERT(m_son == 0);
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     ++s_free;
+ #endif
+ }
+@@ -722,7 +722,7 @@ int SgNode::CountNodes(bool fSetPropOnThisNode)
+     return n;
+ }
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ int SgNode::s_alloc = 0;
+ 
+ int SgNode::s_free = 0;
+diff --git a/fuego/smartgame/SgNode.h b/fuego/smartgame/SgNode.h
+index 07f2580..0034907 100644
+--- a/fuego/smartgame/SgNode.h
++++ b/fuego/smartgame/SgNode.h
+@@ -319,7 +319,7 @@ public:
+ 
+     static void CopySubtree(const SgNode* node, SgNode* copy);
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     /** Total number of nodes allocated, still in use. */
+     static void GetStatistics(int* numAlloc, int* numUsed);
+ #endif
+@@ -379,7 +379,7 @@ private:
+     /** Not implemented. */
+     SgNode& operator=(const SgNode&);
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+     static int s_alloc;
+ 
+     static int s_free;
+diff --git a/fuego/smartgame/SgSearch.cpp b/fuego/smartgame/SgSearch.cpp
+index 7530911..d0551ff 100644
+--- a/fuego/smartgame/SgSearch.cpp
++++ b/fuego/smartgame/SgSearch.cpp
+@@ -815,7 +815,7 @@ int SgSearch::SearchEngine(int depth, int alpha, int beta,
+         }
+ 
+         // Make sure the move added to the hash table really got generated.
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+         if (hasMove && stack.NonEmpty() && ! m_aborted)
+         {
+             SgMove bestMove = stack.Top();
+diff --git a/fuego/smartgame/SgSystem.cpp b/fuego/smartgame/SgSystem.cpp
+index 1bc5725..35de31c 100644
+--- a/fuego/smartgame/SgSystem.cpp
++++ b/fuego/smartgame/SgSystem.cpp
+@@ -48,7 +48,7 @@ SgAssertionHandler::~SgAssertionHandler()
+ 
+ //----------------------------------------------------------------------------
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ 
+ /** Set the shell variable SMARTGAME_ASSERT_CONTINUE to drop into the debugger
+     instead of aborting the program whenever an SG_ASSERT fails */
+diff --git a/fuego/smartgame/SgSystem.h b/fuego/smartgame/SgSystem.h
+index da65ee3..ad4afca 100644
+--- a/fuego/smartgame/SgSystem.h
++++ b/fuego/smartgame/SgSystem.h
+@@ -25,9 +25,9 @@ inline void SG_UNUSED(const T&)
+ {
+ }
+ 
+-/** Avoid compiler warnings for variables used only if NDEBUG is not defined.
++/** Avoid compiler warnings for variables used only if FUEGO_NDEBUG is not defined.
+     This macro is more portable than using a \#pragma directive. */
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ #define SG_DEBUG_ONLY(x)
+ #else
+ #define SG_DEBUG_ONLY(x) SG_UNUSED(x)
+@@ -80,7 +80,7 @@ public:
+     virtual void Run() = 0;
+ };
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ 
+ /** System-specific action when an SG_ASSERT fails */
+ void SgHandleAssertion(const char* expr, const char* file, int line);
+@@ -99,7 +99,7 @@ void SgHandleAssertion(const char* expr, const char* file, int line);
+ 
+ //----------------------------------------------------------------------------
+ 
+-#ifndef NDEBUG
++#ifndef FUEGO_NDEBUG
+ const bool SG_CHECK = true;
+ const bool SG_HEAVYCHECK = SG_CHECK && true;
+ #else
