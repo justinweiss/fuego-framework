@@ -16,8 +16,8 @@ SIMULATOR_DIR=${WRK_DIR}/Release-iphonesimulator
 
 
 # Building both architectures.
-xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphoneos
-xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphonesimulator
+xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphoneos OTHER_CFLAGS="-fembed-bitcode"
+xcodebuild -configuration "Release" -target "${FMK_NAME}" -sdk iphonesimulator OTHER_CFLAGS="-fembed-bitcode"
 
 # Cleaning the oldest.
 if [ -d "${INSTALL_DIR}" ]

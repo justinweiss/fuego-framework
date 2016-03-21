@@ -16,4 +16,5 @@ echo "Building fuego.framework..."
 
 ./build_framework.sh
 
-rm -rf boost_*.tar.bz2 src ios fuego-*.tar.gz fuego build 
+rm -rf boost_*.tar.bz2 src ios
+rm -rf fuego-*.tar.gz fuego build
